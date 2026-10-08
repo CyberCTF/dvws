@@ -18,7 +18,7 @@ written for it (upstream ships no Dockerfile), with the database created at firs
 
 ```bash
 isoloom generate
-isoloom up docker
+isoloom run docker
 ```
 
 Then open http://localhost:8026/dvws/. The database is already created ("Setup instructions"

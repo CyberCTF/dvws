@@ -1,0 +1,224 @@
+{
+  "generated_by_isoloom": "from isoloom.yml; don't edit: change the spec and run `isoloom generate` (`isoloom check` fails when this file is out of date)",
+  "resolved_version": 1,
+  "name": "dvws",
+  "instance": null,
+  "inputs": [],
+  "networks": {
+    "lab": {
+      "cidr": "10.60.26.0/24",
+      "docker_cidr": "10.60.26.0/24",
+      "internet": false,
+      "gateway": null,
+      "gateway_address": "10.60.26.1",
+      "router": null,
+      "controller": "10.60.26.253"
+    }
+  },
+  "reach": [],
+  "machines": {
+    "db": {
+      "access": false,
+      "supplied": false,
+      "shapes": [
+        "docker"
+      ],
+      "arch": "amd64",
+      "os": null,
+      "windows": false,
+      "addresses": {
+        "lab": "10.60.26.20"
+      },
+      "docker_addresses": {
+        "lab": "10.60.26.20"
+      },
+      "services": [
+        {
+          "port": 3306,
+          "name": "mariadb",
+          "http": false,
+          "publish": null
+        }
+      ],
+      "depends_on": [],
+      "inputs": [],
+      "volumes": {
+        "data": "/var/lib/mysql"
+      },
+      "resources": {
+        "cpus": 1,
+        "memory_mb": 512,
+        "disk_gb": 20
+      },
+      "gateway_of": [],
+      "routes": [],
+      "default_gateway": null,
+      "offline": true
+    },
+    "dvws": {
+      "access": false,
+      "supplied": false,
+      "shapes": [
+        "docker"
+      ],
+      "arch": "amd64",
+      "os": null,
+      "windows": false,
+      "addresses": {
+        "lab": "10.60.26.10"
+      },
+      "docker_addresses": {
+        "lab": "10.60.26.10"
+      },
+      "services": [
+        {
+          "port": 80,
+          "name": "web",
+          "http": true,
+          "publish": 8026
+        }
+      ],
+      "depends_on": [
+        "db"
+      ],
+      "inputs": [],
+      "volumes": {},
+      "resources": {
+        "cpus": 1,
+        "memory_mb": 512,
+        "disk_gb": 20
+      },
+      "gateway_of": [],
+      "routes": [],
+      "default_gateway": null,
+      "offline": true
+    }
+  },
+  "start_order": [
+    "db",
+    "dvws"
+  ],
+  "clones": {},
+  "tools": {},
+  "groups": {},
+  "router": null,
+  "controller": {
+    "addresses": {
+      "lab": "10.60.26.253"
+    }
+  },
+  "published": [
+    {
+      "machine": "dvws",
+      "port": 80,
+      "host_port": 8026
+    }
+  ],
+  "targets": {
+    "possible": [
+      "docker",
+      "hosted",
+      "docker-vm",
+      "cloud-docker",
+      "kubernetes"
+    ],
+    "generated": [
+      "docker",
+      "hosted",
+      "docker-vm",
+      "cloud-docker",
+      "kubernetes"
+    ],
+    "refused": {},
+    "not_possible": {
+      "hybrid": "only when some machines are containers and others are VMs",
+      "vagrant": "needs `vm:` on db, dvws",
+      "proxmox": "needs `vm:` on db, dvws",
+      "cloud-vm": "needs `vm:` on db, dvws",
+      "external": "needs `external:` on db, dvws"
+    }
+  },
+  "checks": {
+    "default_position": "networks",
+    "positions": [
+      {
+        "position": "networks",
+        "machine": null,
+        "runner": "isoloom-check",
+        "checks": [
+          {
+            "name": "DVWS answers",
+            "derived": false,
+            "kind": "http",
+            "target": "http://dvws/dvws/",
+            "expect": "200",
+            "wait": 180
+          },
+          {
+            "name": "the SQL injection REST API reads the users table (the database is created)",
+            "derived": false,
+            "kind": "script",
+            "target": "checks/sqli.sh",
+            "expect": "",
+            "wait": 90
+          },
+          {
+            "name": "the SOAP service publishes its WSDL",
+            "derived": false,
+            "kind": "http",
+            "target": "http://dvws/dvws/vulnerabilities/wsdlenum/service.php?wsdl",
+            "expect": "200",
+            "wait": 30
+          }
+        ]
+      },
+      {
+        "position": "db",
+        "machine": "db",
+        "runner": "isoloom-check-db",
+        "checks": [
+          {
+            "name": "dvws:80 from db",
+            "derived": true,
+            "kind": "http",
+            "target": "http://10.60.26.10:80/",
+            "expect": "any",
+            "wait": 30
+          },
+          {
+            "name": "no internet from db",
+            "derived": true,
+            "kind": "http",
+            "target": "http://1.1.1.1/",
+            "expect": "blocked",
+            "wait": 0
+          }
+        ]
+      },
+      {
+        "position": "dvws",
+        "machine": "dvws",
+        "runner": "isoloom-check-dvws",
+        "checks": [
+          {
+            "name": "db:3306 from dvws",
+            "derived": true,
+            "kind": "tcp",
+            "target": "10.60.26.20:3306",
+            "expect": "open",
+            "wait": 30
+          },
+          {
+            "name": "no internet from dvws",
+            "derived": true,
+            "kind": "http",
+            "target": "http://1.1.1.1/",
+            "expect": "blocked",
+            "wait": 0
+          }
+        ]
+      }
+    ]
+  },
+  "message": "DVWS answers at http://localhost:8026/dvws/. The database is\nalready created; each exercise is in the side menu. Start with WSDL Enumeration.\n"
+}

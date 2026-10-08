@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://www.isoloom.com/schema/v1.json
+# DVWS, Damn Vulnerable Web Services (the original PHP version, by snoopysecurity) as an Isoloom
+# spec: the upstream source, vendored unchanged in build/dvws/app/, served by a PHP 5.6 / Apache
+# image we wrote (upstream has no Dockerfile), and a MariaDB machine. The image creates the
+# database at first start. `isoloom generate`, then `isoloom up docker`.
+version: 1
+name: dvws
+
+networks:
+  lab: { cidr: 10.60.26.0/24, internet: false }
+
+machines:
+  db:
+    networks: { lab: 20 }
+    services: [{ port: 3306, name: mariadb }]
+    resources: { cpus: 1, memory_mb: 512 }
+    volumes: { data: /var/lib/mysql }
+    docker:
+      build: build/db
+
+  dvws:
+    networks: { lab: 10 }
+    services: [{ port: 80, name: web, http: true, publish: 8026 }]
+    resources: { cpus: 1, memory_mb: 512 }
+    depends_on: [db]
+    docker:
+      build: build/dvws
+
+checks:
+  - name: DVWS answers
+    http: http://dvws/dvws/
+    wait: 180
+  - name: the SQL injection REST API reads the users table (the database is created)
+    script: checks/sqli.sh
+    wait: 90
+  - name: the SOAP service publishes its WSDL
+    http: http://dvws/dvws/vulnerabilities/wsdlenum/service.php?wsdl
+
+message: |
+  DVWS answers at http://localhost:{{ machines.dvws.services.0.publish }}/dvws/. The database is
+  already created; each exercise is in the side menu. Start with WSDL Enumeration.

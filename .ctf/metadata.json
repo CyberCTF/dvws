@@ -4,6 +4,5 @@
   "question": "Exploit each DVWS web service exercise, starting with WSDL enumeration.",
   "category": "WEB",
   "difficulty": 2,
-  "evidence_kind": "SECRET",
-  "capabilities": ["soap-testing", "xxe", "xpath-injection", "sql-injection", "ssrf", "jwt-attacks"]
+  "evidence_kind": "SECRET"
 }

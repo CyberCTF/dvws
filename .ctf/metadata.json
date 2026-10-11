@@ -1,7 +1,7 @@
 {
   "title": "DVWS (PHP)",
   "description": "Damn Vulnerable Web Services, the original PHP version: SOAP, XML-RPC, JSON-RPC and REST endpoints with WSDL enumeration, XXE, XML bomb, XPath injection, command injection, SSRF, REST SQL injection, JWT and CORS flaws.",
-  "question": "Exploit each DVWS web service exercise, starting with WSDL enumeration.",
+  "question": "Use the XXE exercise (or the command injection one) to read /ctf/flag on the server.",
   "category": "WEB",
   "difficulty": 2,
   "evidence_kind": "SECRET"

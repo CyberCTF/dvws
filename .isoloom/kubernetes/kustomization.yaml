@@ -12,3 +12,4 @@ configMapGenerator:
   - name: isoloom-scripts
     files:
       - checks__sqli.sh=../../checks/sqli.sh
+      - ctf__flag.sh=../../ctf/flag.sh

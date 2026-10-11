@@ -1,0 +1,41 @@
+{
+  "objectives": [
+    {
+      "key": "main",
+      "title": "Read the flag",
+      "prompt": "Make one of the DVWS XML services read a local file of the server for you, and get /ctf/flag.",
+      "check": { "evidence": "SECRET", "format": "FLAG{%s}" },
+      "dev": "FLAG{dev-dvws}",
+      "hints": [
+        "The XML External Entity exercise parses the XML you post and echoes part of it back.",
+        "An XML parser that resolves external entities can be asked to load a file by its URI."
+      ],
+      "steps": [
+        {
+          "key": "exercise",
+          "title": "Pick the exercise",
+          "prompt": "Which DVWS exercise parses XML you supply and echoes part of it back? (vulnerability class acronym)",
+          "check": { "answer": ["xxe", "xml external entity", "xml external entities"] }
+        },
+        {
+          "key": "parameter",
+          "title": "Find the input",
+          "prompt": "Which POST parameter of that exercise carries the XML document?",
+          "check": { "answer": ["name"] }
+        },
+        {
+          "key": "function",
+          "title": "Find the parser",
+          "prompt": "Which PHP function turns that string into an XML object?",
+          "check": { "answer": ["simplexml_load_string", "simplexml_load_string()", "simplexml"] }
+        },
+        {
+          "key": "scheme",
+          "title": "Point at a local file",
+          "prompt": "Which URI scheme names a file on the server's own disk?",
+          "check": { "answer": ["file", "file://", "file:"] }
+        }
+      ]
+    }
+  ]
+}
